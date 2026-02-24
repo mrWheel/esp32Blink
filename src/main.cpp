@@ -1,107 +1,170 @@
-/* simpel test program */
+//--- Simple test program (LED or NeoPixel selected via build_flags)
 
 #include <Arduino.h>
 #include <FS.h>
 #include <LittleFS.h>
 
-#ifndef LED_BUILTIN
-  #define LED_BUILTIN 2
+const char* PROG_VERSION = "1.0.0";
+#ifdef USE_NEOPIXEL
+  #include <Adafruit_NeoPixel.h>
 #endif
 
-const char* PROG_VERSION = "1.1.0";
+const char* progVersion = "1.1.0";
+
+#ifdef USE_NEOPIXEL
+Adafruit_NeoPixel neoPixel(
+  NEOPIXEL_COUNT,
+  NEOPIXEL_PIN,
+  NEO_GRB + NEO_KHZ800
+);
+#endif
 
 void listFiles(fs::FS &fileSystem, const char *directoryPath)
 {
+  Serial.println();
   File rootDirectory = fileSystem.open(directoryPath);
 
   if (!rootDirectory || !rootDirectory.isDirectory())
   {
-    Serial.println("Kon root directory niet openen.");
+    Serial.println("Error: Could not open root directory.");
     return;
   }
 
   File currentEntry = rootDirectory.openNextFile();
   if (!currentEntry)
   {
-    Serial.println("Geen bestanden gevonden.");
+    Serial.println("Info: No files found.");
   }
 
   while (currentEntry)
   {
-    Serial.print(currentEntry.isDirectory() ? "DIR : " : "FILE: ");
-    Serial.print(currentEntry.name());
+    Serial.printf(
+      "%s%s",
+      currentEntry.isDirectory() ? "DIR : " : "FILE: ",
+      currentEntry.name()
+    );
+
     if (!currentEntry.isDirectory())
     {
-      Serial.print("\tSIZE: ");
-      Serial.println(currentEntry.size());
+      Serial.printf("\tSIZE: %u\n", (unsigned)currentEntry.size());
     }
     else
     {
       Serial.println();
     }
+
     currentEntry = rootDirectory.openNextFile();
   }
-}
+
+}   //   listFiles()
 
 void printLittleFsUsage()
 {
+  Serial.println();
   size_t totalBytes = LittleFS.totalBytes();
-  size_t usedBytes = LittleFS.usedBytes();
-  float usedPercent = 0.0F;
+  size_t usedBytes  = LittleFS.usedBytes();
 
+  float usedPercent = 0.0F;
   if (totalBytes > 0)
   {
-    usedPercent = (static_cast<float>(usedBytes) * 100.0F) / static_cast<float>(totalBytes);
+    usedPercent = (float)usedBytes * 100.0F / (float)totalBytes;
   }
 
-  Serial.print("LittleFS total bytes: ");
-  Serial.println(totalBytes);
-  Serial.print("LittleFS used bytes: ");
-  Serial.println(usedBytes);
-  Serial.print("LittleFS usage: ");
-  Serial.print(usedPercent, 2);
-  Serial.println("%");
-}
+  Serial.printf("LittleFS total bytes: %u\n", (unsigned)totalBytes);
+  Serial.printf("LittleFS used bytes : %u\n", (unsigned)usedBytes);
+  Serial.printf("LittleFS usage      : %.2f%%\n", usedPercent);
+
+}   //   printLittleFsUsage()
+
+void initOutput()
+{
+#ifdef USE_LED
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
+  Serial.printf("Using LED on pin %d\n", LED_PIN);
+#endif
+
+#ifdef USE_NEOPIXEL
+  neoPixel.begin();
+  neoPixel.setBrightness(20);
+  neoPixel.clear();
+  neoPixel.show();
+  Serial.printf("Using NeoPixel on pin %d\n", NEOPIXEL_PIN);
+#endif
+
+}   //   initOutput()
+
+void toggleOutput()
+{
+#ifdef USE_LED
+  digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+  Serial.printf(
+    "LED is %s\n",
+    digitalRead(LED_PIN) ? "ON" : "OFF"
+  );
+#endif
+
+#ifdef USE_NEOPIXEL
+  static bool isOn = false;
+
+  if (isOn)
+  {
+    neoPixel.clear();
+    Serial.println("NeoPixel is OFF");
+  }
+  else
+  {
+    neoPixel.setPixelColor(0, neoPixel.Color(0, 0, 255));
+    Serial.println("NeoPixel is ON");
+  }
+
+  neoPixel.show();
+  isOn = !isOn;
+#endif
+
+}   //   toggleOutput()
+
+void initLittleFs()
+{
+  Serial.println("\n\nInitializing LittleFS...");
+  if (!LittleFS.begin(true))
+  {
+    Serial.println("Error: LittleFS initialization failed.");
+    return;
+  }
+
+  Serial.println("Info: LittleFS initialization OK.");
+  printLittleFsUsage();
+  listFiles(LittleFS, "/");
+
+  Serial.println("\n");
+
+}   //   initLittleFs()
 
 void setup()
 {
   Serial.begin(115200);
-  while (!Serial)
-  {
-    delay(1000);
-  }
+  delay(200);
 
-  Serial.print("Program version: ");
-  Serial.println(PROG_VERSION);
+  Serial.printf("Program version: %s\n", progVersion);
 
-  pinMode(LED_BUILTIN, OUTPUT);
+  initOutput();
+  initLittleFs();
 
-  if (!LittleFS.begin(true))
-  {
-    Serial.println("LittleFS initialisatie mislukt.");
-  }
-  else
-  {
-    Serial.println("LittleFS initialisatie OK.");
-    printLittleFsUsage();
-    listFiles(LittleFS, "/");
-  }
-
-} // setup()
+}   //   setup()
 
 void loop()
 {
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-
-  if (digitalRead(LED_BUILTIN) == HIGH)
-  {
-    Serial.println("LED pin is HIGH");
-  }
-  else
-  {
-    Serial.println("LED pin is LOW");
-  }
-
+  static int count = 5;
+  toggleOutput();
   delay(2500);
+  if (count > 10)
+  {
+    initLittleFs();
+    count = 0;
+    delay(2000);
+    return;
+  }
+  count++;
 
-} // loop()
+}   //   loop()
