@@ -4,12 +4,11 @@
 #include <FS.h>
 #include <LittleFS.h>
 
-const char* PROG_VERSION = "1.0.0";
+const char* PROG_VERSION = "1.1.0";
+
 #ifdef USE_NEOPIXEL
   #include <Adafruit_NeoPixel.h>
 #endif
-
-const char* progVersion = "1.1.0";
 
 #ifdef USE_NEOPIXEL
 Adafruit_NeoPixel neoPixel(
@@ -18,6 +17,8 @@ Adafruit_NeoPixel neoPixel(
   NEO_GRB + NEO_KHZ800
 );
 #endif
+
+uint32_t delayTime = 2000;
 
 void listFiles(fs::FS &fileSystem, const char *directoryPath)
 {
@@ -130,6 +131,7 @@ void initLittleFs()
   if (!LittleFS.begin(true))
   {
     Serial.println("Error: LittleFS initialization failed.");
+    delayTime = 1000;
     return;
   }
 
@@ -146,7 +148,7 @@ void setup()
   Serial.begin(115200);
   delay(200);
 
-  Serial.printf("Program version: %s\n", progVersion);
+  Serial.printf("Program version: %s\n", PROG_VERSION);
 
   initOutput();
   initLittleFs();
@@ -157,12 +159,12 @@ void loop()
 {
   static int count = 5;
   toggleOutput();
-  delay(2500);
+  delay(delayTime);
   if (count > 10)
   {
     initLittleFs();
     count = 0;
-    delay(2000);
+    delay(delayTime/2);
     return;
   }
   count++;

@@ -1,8 +1,0 @@
-{
-  "name": "esp32Blink",
-  "long_name_nl": "esp32Blink",
-  "long_name_en": "esp32Blink",
-  "description_en": "Firmware project for esp32Blink",
-  "description_nl": "Firmware project voor esp32Blink",
-  "image": "project.png"
-}
