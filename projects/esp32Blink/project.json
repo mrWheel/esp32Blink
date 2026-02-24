@@ -1,0 +1,10 @@
+{
+  "name": "esp32Blink",
+  "description_nl": "Dit project is bedoelt om de flasherWebsite te testen. Dit project test spiffs en laat een LED knipperen",
+  "description_en": "This project is intended to test the flasher website. This project tests spiffs and makes an LED blink.",
+  "long_name_en": "esp32Blink for an esp32 board",
+  "long_name_nl": "esp32Blink voor een esp32 bordje",
+  "github_url": "https://github.com/mrWheel/",
+  "post_url": "https://willem.aandewiel.nl/",
+  "image": "esp32Blink.png"
+}

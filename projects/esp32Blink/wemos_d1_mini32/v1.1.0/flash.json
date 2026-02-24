@@ -1,0 +1,22 @@
+{
+  "board": "wemos_d1_mini32",
+  "version": "v1.1.0",
+  "flash_files": [
+    {
+      "offset": "0x1000",
+      "file": "bootloader.bin"
+    },
+    {
+      "offset": "0x8000",
+      "file": "partitions.bin"
+    },
+    {
+      "offset": "0x10000",
+      "file": "firmware.bin"
+    },
+    {
+      "offset": "0x190000",
+      "file": "LittleFS.bin"
+    }
+  ]
+}
