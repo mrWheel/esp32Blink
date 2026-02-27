@@ -4,7 +4,7 @@
 #include <FS.h>
 #include <LittleFS.h>
 
-const char* PROG_VERSION = "1.1.0";
+const char* PROG_VERSION = "1.2.0";
 
 #ifdef USE_NEOPIXEL
   #include <Adafruit_NeoPixel.h>

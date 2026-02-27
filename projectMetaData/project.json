@@ -4,7 +4,7 @@
   "description_en": "This project is intended to test the flasher website. This project tests spiffs and makes an LED blink.",
   "long_name_en": "esppressifBlink for an Espressif board",
   "long_name_nl": "espressifBlink voor een Espressif bordje",
-  "github_url": "https://github.com/mrWheel/",
+  "github_url": "https://github.com/mrWheel/espressifBlink",
   "post_url": "https://willem.aandewiel.nl/",
   "image": "espressifBlink.png"
 }
